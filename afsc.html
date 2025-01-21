@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enhanced AFSC App</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f9;
+            color: #002244;
+        }
+        header {
+            background: linear-gradient(90deg, #003399, #001f5b);
+            color: white;
+            padding: 15px;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        header h1 {
+            margin: 0;
+            font-size: 1.8rem;
+        }
+        .container {
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .controls {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+        }
+        .control-item {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .control-item label {
+            font-size: 0.9rem;
+            font-weight: bold;
+            color: #003366;
+        }
+        input,
+        select,
+        button {
+            padding: 10px;
+            font-size: 0.9rem;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        input:focus,
+        select:focus {
+            border-color: #003399;
+            box-shadow: 0 0 4px rgba(0, 51, 153, 0.3);
+        }
+        #fileInput {
+            
+            padding-top: 8px;
+            height: 16.8px;
+            padding-bottom: 12px;
+        }
+        button {
+            background-color: #003399;
+            color: white;
+            font-weight: bold;
+            border: none;
+            border-radius: 6px;
+            padding: 12px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        button:hover {
+            background-color: #002266;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: white;
+            margin-top: 20px;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        th, td {
+            text-align: left;
+            padding: 14px;
+            border: 1px solid #ddd;
+        }
+        th {
+            background-color: #003399;
+            color: white;
+            cursor: pointer;
+        }
+        th .sort-icon {
+            font-size: 0.75rem;
+            margin-left: 5px;
+        }
+        th:hover {
+            background-color: #002266;
+        }
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        tr:hover {
+            background-color: #e6f7ff;
+        }
+        @media (max-width: 768px) {
+            .controls {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+            th, td {
+                font-size: 0.85rem;
+                padding: 10px;
+            }
+            button {
+                font-size: 0.85rem;
+                padding: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>AFSC Lookup</h1>
+    </header>
+    <div class="container">
+        <div class="controls">
+            <div class="control-item">
+                <label for="fileInput">Upload File</label>
+                <input type="file" id="fileInput" accept=".xlsx" onchange="loadAndProcessFile(event)">
+            </div>
+            <div class="control-item">
+                <label for="searchInput">Search</label>
+                <input type="text" id="searchInput" placeholder="Search by Name or Code" oninput="applyFilters()">
+            </div>
+            <div class="control-item">
+                <label>MAGE Requirements</label>
+                <div style="display: flex; flex-wrap: wrap; gap: 10px;">
+                    <input type="number" id="minM" placeholder="M" min="0" max="99" oninput="applyFilters()" style="flex: 1; min-width: 60px;">
+                    <input type="number" id="minA" placeholder="A" min="0" max="99" oninput="applyFilters()" style="flex: 1; min-width: 60px;">
+                    <input type="number" id="minG" placeholder="G" min="0" max="99" oninput="applyFilters()" style="flex: 1; min-width: 60px;">
+                    <input type="number" id="minE" placeholder="E" min="0" max="99" oninput="applyFilters()" style="flex: 1; min-width: 60px;">
+                </div>
+            </div>
+            <div class="control-item">
+                <label for="licenseFilter">Driver's License</label>
+                <select id="licenseFilter" onchange="applyFilters()">
+                    <option value="">All</option>
+                    <option value="Yes">Required</option>
+                    <option value="No">Not Required</option>
+                </select>
+            </div>
+            <div class="control-item">
+                <label for="citizenshipFilter">Citizenship</label>
+                <select id="citizenshipFilter" onchange="applyFilters()">
+                    <option value="">All</option>
+                    <option value="true">Required</option>
+                    <option value="false">Not Required</option>
+                </select>
+            </div>
+            <div class="control-item">
+                <label for="clearanceFilter">Clearance Level</label>
+                <select id="clearanceFilter" onchange="applyFilters()">
+                    <option value="">All</option>
+                    <option value="ENTNAC (C)">ENTNAC (C)</option>
+                    <option value="NACLC (B)">NACLC (B)</option>
+                    <option value="SSBI (F)">SSBI (F)</option>
+                </select>
+            </div>
+            <div class="control-item" style="display: none;">
+                <button id="resetButton" onclick="resetFilters()">Reset Filters</button>
+            </div>
+        </div>
+        <table id="dataTable">
+            <thead>
+                <tr>
+                    <th onclick="sortTable(0)">AFSC</th>
+                    <th onclick="sortTable(1)">Clearance Level</th>
+                    <th onclick="sortTable(2)">Name</th>
+                    <th onclick="sortTable(3)">Driver's License</th>
+                    <th onclick="sortTable(4)">MAGE Requirement</th>
+                </tr>
+            </thead>
+            <tbody id="dataRows"></tbody>
+        </table>
+    </div>
+    <script>
+        let rawData = [];
+        let sortDirections = [true, true, true, true, true]; // Default: Ascending for all columns
+        const clearanceHierarchy = { SSBI: ['SSBI', 'NACLC', 'ENTNAC'], NACLC: ['NACLC', 'ENTNAC'], ENTNAC: ['ENTNAC'] };
+
+        function loadAndProcessFile(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                const data = new Uint8Array(e.target.result);
+                const workbook = XLSX.read(data, { type: "array" });
+                const sheetName = workbook.SheetNames[0];
+                rawData = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName]);
+                populateTable(rawData);
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        function populateTable(data) {
+            const tbody = document.getElementById("dataRows");
+            tbody.innerHTML = "";
+            data.forEach(row => {
+                const afscCombined = `${row["AFSC"]} / ${row["AFSC DOC"]}`;
+                const clearanceLevel = getClearanceLevel(row);
+                const mageRequirement = getMageRequirement(row);
+                const licenseRequired = row["LICENSE"] ? "Yes" : "No";
+                const nameLink = `<a href="${row["URL"]}" target="_blank">${row["NAME"]}</a>`;
+                const tr = document.createElement("tr");
+                tr.innerHTML = `
+                    <td>${afscCombined}</td>
+                    <td>${clearanceLevel}</td>
+                    <td>${nameLink}</td>
+                    <td>${licenseRequired}</td>
+                    <td>${mageRequirement}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function getClearanceLevel(row) {
+            if (row["SSBI"]) return "SSBI (F)";
+            if (row["NATIONAL AGENCY CHECK"] || row["LOCAL AGENCY CHECK"]) return "NACLC (B)";
+            return "ENTNAC (C)";
+        }
+
+        function getMageRequirement(row) {
+            const scores = [];
+            if (row['MIN M']) scores.push(`M${row['MIN M']}`);
+            if (row['MIN A']) scores.push(`A${row['MIN A']}`);
+            if (row['MIN G']) scores.push(`G${row['MIN G']}`);
+            if (row['MIN E']) scores.push(`E${row['MIN E']}`);
+            return scores.length > 0 ? scores.join(' & ') : 'N/A';
+        }
+
+        function applyFilters() {
+            const licenseFilter = document.getElementById("licenseFilter").value;
+            const citizenshipFilter = document.getElementById("citizenshipFilter").value;
+            const clearanceFilter = document.getElementById("clearanceFilter").value;
+            const searchInput = document.getElementById('searchInput').value.toLowerCase();
+            const minM = parseInt(document.getElementById('minM').value, 10) || 0;
+            const minA = parseInt(document.getElementById('minA').value, 10) || 0;
+            const minG = parseInt(document.getElementById('minG').value, 10) || 0;
+            const minE = parseInt(document.getElementById('minE').value, 10) || 0;
+
+            const filteredData = rawData.filter(row => {
+                const matchesLicense = !licenseFilter || (row["LICENSE"] ? "Yes" : "No") === licenseFilter;
+                const matchesCitizenship = !citizenshipFilter || String(row["CITIZENSHIP"]) === String(citizenshipFilter);
+                const matchesClearance = !clearanceFilter || getClearanceLevel(row) === clearanceFilter;
+                const matchesSearch = row['AFSC']?.toLowerCase().includes(searchInput) || row['NAME']?.toLowerCase().includes(searchInput);
+                return (!minM || row['MIN M'] >= minM) &&
+                       (!minA || row['MIN A'] >= minA) &&
+                       (!minG || row['MIN G'] >= minG) &&
+                       (!minE || row['MIN E'] >= minE) &&
+                       matchesLicense && 
+                       matchesCitizenship && 
+                       matchesClearance && 
+                       matchesSearch;
+            });
+
+            populateTable(filteredData);
+        }
+
+        function resetFilters() {
+            document.getElementById("licenseFilter").value = "";
+            document.getElementById("citizenshipFilter").value = "";
+            document.getElementById("clearanceFilter").value = "";
+            document.getElementById("minM").value = "";
+            document.getElementById("minA").value = "";
+            document.getElementById("minG").value = "";
+            document.getElementById("minE").value = "";
+            document.getElementById("searchInput").value = "";
+            populateTable(rawData);
+        }
+
+        function sortTable(columnIndex) {
+            const ascending = sortDirections[columnIndex];
+            rawData.sort((a, b) => {
+                const valueA = getValueForColumn(a, columnIndex);
+                const valueB = getValueForColumn(b, columnIndex);
+                return ascending ? valueA.localeCompare(valueB) : valueB.localeCompare(valueA);
+            });
+            sortDirections[columnIndex] = !ascending;
+            populateTable(rawData);
+        }
+
+        function getValueForColumn(row, columnIndex) {
+            switch (columnIndex) {
+                case 0: return `${row["AFSC"]} / ${row["AFSC DOC"]}`.toLowerCase();
+                case 1: return getClearanceLevel(row).toLowerCase();
+                case 2: return row["NAME"].toLowerCase();
+                case 3: return (row["LICENSE"] ? "Yes" : "No").toLowerCase();
+                case 4: return getMageRequirement(row).toLowerCase();
+                default: return "";
+            }
+        }
+    </script>
+</body>
+</html>
