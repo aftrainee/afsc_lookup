@@ -65,6 +65,7 @@ The `.xlsx` file serves as the data backbone for the AFSC Lookup Tool. It uses a
 | `LICENSE`               | Indicates if a driver's license is required (`Yes` or `No`).                  |
 | `CITIZENSHIP`           | Indicates if U.S. citizenship is required (`true` for required, `false` otherwise). |
 | `MIN M`, `MIN A`, `MIN G`, `MIN E` | Minimum Mechanical, Administrative, General, and Electrical scores required for the AFSC. Enter numbers (e.g., 50). Leave blank if not applicable. |
+| `MIN ALL` | Indicates whether a single or multiple minimum MAGE scores are required for an AFSC. |
 | `URL`                   | A hyperlink to additional information about the AFSC.                         |
 | `SSBI`, `NATIONAL AGENCY CHECK`, `LOCAL AGENCY CHECK` | Indicate security clearance requirements (`true` or `false`). At least one must be provided for clearance determination. |
 
