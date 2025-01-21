@@ -81,7 +81,8 @@ The `.xlsx` file serves as the data backbone for the AFSC Lookup Tool. It uses a
      - `AFSC`: Enter the primary code.
      - `NAME`: Provide the AFSC name.
      - `MIN M`, `MIN A`, `MIN G`, `MIN E`: Enter the MAGE scores if applicable. Leave blank if not required.
-     - `LICENSE`: Specify `Yes` or `No` for driver's license requirements.
+     - `MIN ALL`: Specifies whether multiple minimum MAGE scores are required for an AFSC. When TRUE, all specified MAGE scores must be met (logical AND). When FALSE, meeting any one of the specified scores is sufficient (logical OR).
+     - `LICENSE`: Specify `true` or `false` for driver's license requirements.
      - `CITIZENSHIP`: Use `true` for required or `false` for not required.
      - `URL`: Add a valid hyperlink for additional details.
      - Clearance columns (`SSBI`, etc.): Use `true` or `false` based on clearance requirements.
