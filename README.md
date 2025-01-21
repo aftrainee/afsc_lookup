@@ -20,7 +20,7 @@ The **AFSC Lookup Tool** is a web-based application designed to help users explo
 ## How to Use
 
 1. **Open the Application**:
-   - Open the `afsc.html` file in any modern web browser (e.g., Chrome, Edge, Firefox).
+   - Open the `index.html` file in any modern web browser (e.g., Chrome, Edge, Firefox).
 
 2. **Upload the Dataset**:
    - Click the "Upload File" input field.
